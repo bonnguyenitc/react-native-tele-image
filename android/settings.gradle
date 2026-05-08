@@ -1,0 +1,31 @@
+/**
+ * Library-level settings.gradle
+ *
+ * Mirrors the pattern from example/android/settings.gradle so that
+ * the android/ folder can be opened standalone in Android Studio.
+ *
+ * Two includeBuild calls are BOTH required (same as the example):
+ *   1. Inside pluginManagement  → makes the plugin resolvable
+ *   2. At root level            → enables dependency substitution
+ */
+
+// 1. Register the React Native Gradle Plugin for plugin resolution
+pluginManagement {
+    includeBuild("../node_modules/@react-native/gradle-plugin")
+    repositories {
+        google()
+        mavenCentral()
+        gradlePluginPortal()
+    }
+}
+
+// Apply the settings plugin (provides com.facebook.react plugin to subprojects)
+plugins {
+    id("com.facebook.react.settings")
+    id 'org.gradle.toolchains.foojay-resolver-convention' version '1.0.0'
+}
+
+// 2. Root-level includeBuild for dependency substitution (REQUIRED — see example/android/settings.gradle)
+includeBuild("../node_modules/@react-native/gradle-plugin")
+
+rootProject.name = "teleimage"

@@ -1,0 +1,89 @@
+buildscript {
+  ext.TeleImage = [
+    kotlinVersion: "2.0.21",
+    minSdkVersion: 24,
+    compileSdkVersion: 36,
+    targetSdkVersion: 36
+  ]
+
+  ext.getExtOrDefault = { prop ->
+    if (rootProject.ext.has(prop)) {
+      return rootProject.ext.get(prop)
+    }
+
+    return TeleImage[prop]
+  }
+
+  repositories {
+    google()
+    mavenCentral()
+  }
+
+  dependencies {
+    classpath "com.android.tools.build:gradle:8.9.2"
+    classpath "com.facebook.react:react-native-gradle-plugin"
+    // noinspection DifferentKotlinGradleVersion
+    classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:${getExtOrDefault('kotlinVersion')}"
+  }
+}
+
+
+apply plugin: "com.android.library"
+apply plugin: "kotlin-android"
+
+apply plugin: "com.facebook.react"
+
+android {
+  namespace "com.teleimage"
+
+  compileSdkVersion getExtOrDefault("compileSdkVersion")
+
+  defaultConfig {
+    minSdkVersion getExtOrDefault("minSdkVersion")
+    targetSdkVersion getExtOrDefault("targetSdkVersion")
+
+    // JNI: build Telegram's fastBlur C++ implementation
+    externalNativeBuild {
+      cmake {
+        cppFlags "-std=c++14"
+        arguments "-DANDROID_STL=c++_shared"
+      }
+    }
+    ndk {
+      // Build for all common ABIs
+      abiFilters "arm64-v8a", "armeabi-v7a", "x86_64", "x86"
+    }
+  }
+
+  externalNativeBuild {
+    cmake {
+      path "src/main/cpp/CMakeLists.txt"
+    }
+  }
+
+  buildFeatures {
+    buildConfig true
+  }
+
+  buildTypes {
+    release {
+      minifyEnabled false
+    }
+  }
+
+  lint {
+    disable "GradleCompatible"
+  }
+
+  compileOptions {
+    sourceCompatibility JavaVersion.VERSION_1_8
+    targetCompatibility JavaVersion.VERSION_1_8
+  }
+}
+
+dependencies {
+  implementation "com.facebook.react:react-android"
+  // OkHttp: connection pooling + HTTP/2 (Phase 2)
+  // Telegram uses HttpURLConnection for plain HTTP; OkHttp adds HTTP/2 keepalive
+  implementation "com.squareup.okhttp3:okhttp:4.12.0"
+}
